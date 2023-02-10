@@ -9,8 +9,8 @@
     (fn: _:
       lib.nameValuePair
       (lib.removeSuffix ".nix" fn)
-      "${modulesDir}/${kind}/${fn}")
-    (builtins.readDir ("${modulesDir}/${kind}"));
+      (modulesDir + "/${kind}/${fn}"))
+    (builtins.readDir (modulesDir + "/${kind}"));
 
   flakePartsModules = lib.attrValues (
     lib.filterAttrs

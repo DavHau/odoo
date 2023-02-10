@@ -8,6 +8,9 @@
       flake = false;
     };
     nix-filter.url = "github:numtide/nix-filter";
+    drv-parts.url = "github:DavHau/drv-parts";
+    drv-parts.inputs.nixpkgs.follows = "nixpkgs";
+    drv-parts.inputs.flake-parts.follows = "flake-parts";
   };
 
   outputs = inputs@{ flake-parts, ... }:
