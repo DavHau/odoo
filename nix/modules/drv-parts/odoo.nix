@@ -25,6 +25,8 @@ in {
     ]);
   };
 
+  # Replace some python packages entirely with candidates from nixpkgs, because
+  #   those were hard to fix
   substitutions = {
     python-ldap = python.pkgs.python-ldap;
     pillow = python.pkgs.pillow;
