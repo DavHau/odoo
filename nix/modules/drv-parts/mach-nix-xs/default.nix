@@ -7,26 +7,26 @@
 
   options = {
 
-    pythonSources = lib.mkOption {
+    pythonSources = l.mkOption {
       type = t.package;
       description = ''
         A package that contains fetched python sources.
         Each single python source must be located ina subdirectory named after the package name.
       '';
     };
-    substitutions = lib.mkOption {
+    substitutions = l.mkOption {
       type = t.attrsOf t.package;
       description = ''
         Substitute individual python packages from nixpkgs.
       '';
     };
-    sdistDeps = lib.mkOption {
+    sdistDeps = l.mkOption {
       type = t.functionTo (t.attrsOf (t.listOf (t.oneOf [t.package t.path])));
       description = ''
         Define extra python buildInputs for sdist package builds
       '';
     };
-    overrides = lib.mkOption {
+    overrides = l.mkOption {
       type = t.attrsOf (t.functionTo t.attrs);
       description = ''
         Overrides for sdist package builds
@@ -48,7 +48,7 @@
   '';
 
   # Attributes we never want to copy from nixpkgs
-  excludeNixpkgsAttrs = lib.genAttrs
+  excludeNixpkgsAttrs = l.genAttrs
     [
       "all"
       "args"
@@ -71,14 +71,14 @@
     if ! python.pkgs ? ${pname}
     then {}
     else
-      lib.filterAttrs
+      l.filterAttrs
       (name: _: ! excludeNixpkgsAttrs ? ${name})
       nixpkgsAttrs;
 
   distFile = distDir:
-    "${distDir}/${lib.head (lib.attrNames (builtins.readDir distDir))}";
+    "${distDir}/${l.head (l.attrNames (builtins.readDir distDir))}";
 
-  isWheel = lib.hasSuffix ".whl";
+  isWheel = l.hasSuffix ".whl";
 
   /*
   Ensures that a given file is a wheel.
@@ -107,7 +107,7 @@
       pipInstallFlags = "--find-links ./dist";
 
       # In case of an sdist src, install all deps so a wheel can be built.
-      preInstall = lib.optionalString (sdistDeps ? ${pname})
+      preInstall = l.optionalString (sdistDeps ? ${pname})
         (installWheelFiles sdistDeps.${pname});
     });
 
@@ -117,7 +117,7 @@
 
   # all fetched sources converted to wheels
   wheels =
-    lib.mapAttrs
+    l.mapAttrs
     (name: _: ensureWheel name "${config.pythonSources}/${name}")
     (builtins.readDir config.pythonSources);
 
