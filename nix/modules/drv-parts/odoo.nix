@@ -26,37 +26,11 @@ in {
   };
 
   # Replace some python packages entirely with candidates from nixpkgs, because
-  #   those were hard to fix
+  #   they are hard to fix
   substitutions = {
     python-ldap = python.pkgs.python-ldap;
     pillow = python.pkgs.pillow;
   };
-
-  # Only for sdist deps we need to specify the dependencies, because this
-  #   is required in order to build wheels for them.
-  sdistDeps = wheels: (with wheels; {
-    vobject = [
-      python-dateutil
-      six
-    ];
-    ebaysdk = [
-      certifi
-      chardet
-      idna
-      lxml
-      requests
-      urllib3
-    ];
-    libsass = [
-      six
-    ];
-    ofxparse = [
-      beautifulsoup4
-      lxml
-      six
-      soupsieve
-    ];
-  });
 
   # fix some builds via overrides
   overrides = {

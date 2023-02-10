@@ -20,13 +20,24 @@ in {
       description = ''
         Substitute individual python packages from nixpkgs.
       '';
+      default = {};
     };
 
-    sdistDeps = l.mkOption {
-      type = t.functionTo (t.attrsOf (t.listOf (t.oneOf [t.package t.path])));
+    manualSetupDeps = l.mkOption {
+      type = t.attrsOf (t.listOf t.str);
       description = ''
-        Define extra python buildInputs for sdist package builds
+        Replace the default setup dependencies from nixpkgs for sdist based builds
       '';
+      default = {};
+      example = {
+        vobject = [
+          "python-dateutil"
+          "six"
+        ];
+        libsass = [
+          "six"
+        ];
+      };
     };
 
     overrides = l.mkOption {
@@ -34,6 +45,7 @@ in {
       description = ''
         Overrides for sdist package builds
       '';
+      default = {};
     };
   };
 }

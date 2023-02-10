@@ -4,12 +4,15 @@
 
   python = config.deps.python;
 
-  sdistDeps = config.sdistDeps wheels;
+  manualSetupDeps =
+    lib.mapAttrs
+    (name: deps: map (dep: wheels.${dep}) deps)
+    config.manualSetupDeps;
 
   installWheelFiles = directories: ''
     mkdir -p ./dist
     for dep in ${toString directories}; do
-      echo "dep: $dep"
+      echo "installing dep: $dep"
       cp $dep/* ./dist/
       chmod -R +w ./dist
     done
@@ -25,7 +28,6 @@
       "pname"
       "version"
       "src"
-      "propagatedBuildInputs"
       "outputs"
     ]
     (name: null);
@@ -67,17 +69,28 @@
       if isWheel distFile
       then {}
       else nixpkgsAttrsFor pname;
-    package = python.pkgs.buildPythonPackage (nixpkgsAttrs // {
-      inherit pname;
-      version = "wheel";
-      src = distFile;
-      format = "setuptools";
-      pipInstallFlags = "--find-links ./dist";
+    package = python.pkgs.buildPythonPackage (
 
-      # In case of an sdist src, install all deps so a wheel can be built.
-      preInstall = l.optionalString (sdistDeps ? ${pname})
-        (installWheelFiles sdistDeps.${pname});
-    });
+      nixpkgsAttrs
+
+      // {
+        inherit pname;
+        version = "wheel";
+        src = distFile;
+        format = "setuptools";
+        pipInstallFlags = "--find-links ./dist";
+
+        # In case of an sdist src, install all deps so a wheel can be built.
+        preInstall = l.optionalString (manualSetupDeps ? ${pname})
+          (installWheelFiles manualSetupDeps.${pname});
+      }
+
+      # If setup deps have been specified manually, we need to remove the
+      #   propagatedBuildInputs from nixpkgs to prevent collisions.
+      // lib.optionalAttrs (manualSetupDeps ? ${pname}) {
+        propagatedBuildInputs = [];
+      }
+    );
 
     finalPackage = package.overridePythonAttrs config.overrides.${pname} or (_: {});
   in
