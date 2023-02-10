@@ -60,14 +60,10 @@
       );
 
     mkWheel = pname: distFile: let
-      # nixpkgsAttrs =
-      #   if isWheel distFile
-      #   then {}
-      #   else nixpkgsAttrsFor pname;
       nixpkgsAttrs =
-        if attrsFromNixpkgs.${pname} or false
-        then nixpkgsAttrsFor pname
-        else {};
+        if isWheel distFile
+        then {}
+        else nixpkgsAttrsFor pname;
       package = python.pkgs.buildPythonPackage (nixpkgsAttrs // {
         inherit pname;
         version = "wheel";
@@ -102,17 +98,6 @@
       nativeBuildInputs = [
         pkgs.postgresql
       ];
-    };
-
-    attrsFromNixpkgs = {
-      ebaysdk = true;
-      libsass = true;
-      ofxparse = true;
-      pillow = true;
-      psutil = true;
-      psycopg2 = true;
-      vobject = true;
-      python-ldap = true;
     };
 
     substitutions = {
@@ -164,11 +149,8 @@
       pipInstallFlags = "--ignore-installed";
       buildInputs =
         pkgs.pythonManylinuxPackages.manylinux1
-        # ++ lib.concatMap () wheels
-        ++ python.pkgs.pillow.buildInputs
+        ++ lib.concatMap (whl: whl.dist.buildInputs or []) (lib.attrValues wheels)
         ++ [
-          pkgs.openldap
-          pkgs.libsass
           pkgs.postgresql
         ];
       nativeBuildInputs = [pkgs.autoPatchelfHook];

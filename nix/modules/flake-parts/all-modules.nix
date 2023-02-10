@@ -5,7 +5,6 @@
   moduleKinds = builtins.readDir modulesDir;
 
   mapModules = kind:
-    builtins.trace modulesDir
     lib.mapAttrs'
     (fn: _:
       lib.nameValuePair
